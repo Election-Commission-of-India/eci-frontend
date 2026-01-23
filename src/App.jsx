@@ -2,14 +2,21 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
+import { Route, Routes } from "react-router";
+import Home from "./pages/Home";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <h1 className=" bg-primary text-lg-start text-bg-primary">
-      ECI _ HELLO _ WORLD
-    </h1>
+    <div>
+      <Header />
+      <Routes>
+        <Route path="/home" element={<Home />} />
+      </Routes>
+
+      <Footer />
+    </div>
   );
 }
 
