@@ -40,7 +40,6 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile Portal Title */}
         <div className="md:hidden pb-2 border-t border-gray-100 pt-2">
           <div className="flex flex-col text-center">
             <span className="text-xs font-semibold text-gray-700">
