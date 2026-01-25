@@ -1,20 +1,25 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  
+
   relatedEpicNumber: "",
+  
+  
+  voterDetails: null,
+  fetchingVoter: false,
+  voterNotFound: false,
   
 
   fieldToCorrect: "",
+  oldValue: "", // Auto-filled from voterDetails
   newValue: "",
-  
- 
+
   assemblyConstituencyId: null,
   pollingStationId: null,
+  
 
   assemblies: [],
   pollingStations: [],
-  
 
   isLoading: false,
   error: null,
@@ -28,6 +33,22 @@ const form8Slice = createSlice({
     updateField: (state, action) => {
       const { fieldName, value } = action.payload;
       state[fieldName] = value;
+    },
+    
+    setVoterDetails: (state, action) => {
+      state.voterDetails = action.payload;
+      state.voterNotFound = false;
+      state.fetchingVoter = false;
+    },
+    
+    setFetchingVoter: (state, action) => {
+      state.fetchingVoter = action.payload;
+    },
+    
+    setVoterNotFound: (state) => {
+      state.voterNotFound = true;
+      state.voterDetails = null;
+      state.fetchingVoter = false;
     },
     
     setAssemblies: (state, action) => {
@@ -60,6 +81,9 @@ const form8Slice = createSlice({
 
 export const { 
   updateField, 
+  setVoterDetails,
+  setFetchingVoter,
+  setVoterNotFound,
   setAssemblies, 
   setPollingStations,
   resetForm, 
