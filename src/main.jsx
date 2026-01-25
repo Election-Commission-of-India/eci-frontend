@@ -4,12 +4,16 @@ import "./index.css";
 import App from "./App.jsx";
 import { RecoilRoot } from "recoil";
 import { BrowserRouter } from "react-router";
+import { Provider } from "react-redux";
+import store  from "./store/store.js";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <RecoilRoot>
+        <Provider store={store}>
           <App />
+        </Provider>
       </RecoilRoot>
     </BrowserRouter>
   </StrictMode>,

@@ -4,6 +4,7 @@ import AddressSection from "./AddressSection";
 import DobGenderSection from "./DobGenderSection";
 import PhotoUploadSection from "./PhotoUpload";
 import SubmitSection from "./SubmitSection";
+import RelativeSection from "./RelativeSection";
 export default function Form6() {
   return (
     <div className="flex flex-col gap-6">
@@ -30,10 +31,10 @@ export default function Form6() {
         <section id="dob">
           <DobGenderSection />
         </section>
-
-        <section id="photo">
-          <PhotoUploadSection />
+         <section id="relative">
+          <RelativeSection />
         </section>
+
 
         <section id="submit">
           <SubmitSection />

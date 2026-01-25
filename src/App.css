@@ -1,10 +1,29 @@
 @import "tailwindcss";
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
 @theme {
   /* Custom Colors */
   --color-eci-primary: #5342bf;
   --color-eci-secondary: #daf0f7;
   --color-eci-accent: #fbe3e3;
+
+  --color-eci-pink: #fbe2f4;
+
+  --color-eci-green: #dbf7c4;
 
   --color-eci-yellowish: #ffecba;
   --color-status-pending: #f59e0b;
