@@ -20,8 +20,26 @@ function ServiceSection() {
             iconBg: "bg-blue-200",
             primaryBtn: "bg-blue-500 hover:bg-blue-600",
             }}/>
-        <GenericActionCard />
-        <GenericActionCard />
+        <GenericActionCard 
+          title={"Search Voter Information"} 
+          primaryAction={{ label: "Search", onClick: () => { navigate("/voters/search") } }}
+          theme={{
+            border: "border-green-400",
+            bg: "bg-green-50",
+            iconBg: "bg-green-200",
+            primaryBtn: "bg-green-500 hover:bg-green-600",
+          }}
+        />
+        <GenericActionCard 
+          title={"Admin - Audit Logs"} 
+          primaryAction={{ label: "View Logs", onClick: () => { navigate("/admin/audit-logs") } }}
+          theme={{
+            border: "border-purple-400",
+            bg: "bg-purple-50",
+            iconBg: "bg-purple-200",
+            primaryBtn: "bg-purple-500 hover:bg-purple-600",
+          }}
+        />
       </div>
     </div>
   );

@@ -25,6 +25,13 @@ export default function Header() {
 
           <div className="flex items-center gap-3 md:gap-4">
             <Link
+              to="/voters/search"
+              className="flex items-center gap-2 text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors"
+            >
+              Voter Search
+            </Link>
+
+            <Link
               to="/login"
               className="flex items-center gap-2 text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >

@@ -31,6 +31,22 @@ import EroBloAssignmentPage from "./ero/pages/EroBloAssignmentPage";
 import EroComplaintsPage from "./ero/pages/EroComplaintsPage";
 import EroDocumentsPage from "./ero/pages/EroDocumentsPage";
 
+// BLO Components
+import BloLoginPage from "./blo/pages/BloLoginPage";
+import BloDashboardPage from "./blo/pages/BloDashboardPage";
+import BloProfilePage from "./blo/pages/BloProfilePage";
+import AssignedApplicationsPage from "./blo/pages/AssignedApplicationsPage";
+import ApplicationDetailsPage from "./blo/pages/ApplicationDetailsPage";
+import ApplicationDocumentsPage from "./blo/pages/ApplicationDocumentsPage";
+import ApplicationRecommendationPage from "./blo/pages/ApplicationRecommendationPage";
+
+// Voter Search Components
+import VoterSearch from "./pages/voter/VoterSearch";
+import VoterDetails from "./pages/voter/VoterDetails";
+
+// Admin Components
+import AuditLogs from "./pages/admin/AuditLogs";
+
 function App() {
   return (
     <div>
@@ -57,6 +73,9 @@ function App() {
               <Route path="/complaints/:complaintId/uploaddoc" element={<ComplaintDocuments />} />
               <Route path="/application/:applicationId/complete" element={<ApplicationComplete />} />
               <Route path="/track/status" element={<TrackApplicaiton />} />
+              <Route path="/voters/search" element={<VoterSearch />} />
+              <Route path="/voters/:voterId" element={<VoterDetails />} />
+              <Route path="/admin/audit-logs" element={<AuditLogs />} />
             </Routes>
             <Footer />
           </div>
@@ -73,10 +92,20 @@ function App() {
           <Route path="applications" element={<EroApplicationsPage />} />
           <Route path="applications/:applicationId/details" element={<EroApplicationDetailsPage />} />
           <Route path="voters" element={<EroVotersPage />} />
+          <Route path="voter-search" element={<VoterSearch />} />
           <Route path="blo-assignment" element={<EroBloAssignmentPage />} />
           <Route path="complaints" element={<EroComplaintsPage />} />
           <Route path="documents/application/:applicationId" element={<EroDocumentsPage />} />
         </Route>
+
+        {/* BLO Routes - No Auth for Testing */}
+        <Route path="/blo/login" element={<BloLoginPage />} />
+        <Route path="/blo/dashboard" element={<BloDashboardPage />} />
+        <Route path="/blo/profile" element={<BloProfilePage />} />
+        <Route path="/blo/applications" element={<AssignedApplicationsPage />} />
+        <Route path="/blo/applications/:applicationId/details" element={<ApplicationDetailsPage />} />
+        <Route path="/blo/applications/:applicationId/documents" element={<ApplicationDocumentsPage />} />
+        <Route path="/blo/applications/:applicationId/recommend" element={<ApplicationRecommendationPage />} />
 
       </Routes>
 
