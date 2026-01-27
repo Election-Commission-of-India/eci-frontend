@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authApis } from '../services/authApis';
 
 const AuthContext = createContext();
@@ -13,35 +13,64 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is logged in on app start
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('jwtToken');
+    
+    if (storedUser && token) {
+      setUser(JSON.parse(storedUser));
+    }
+    setLoading(false);
+  }, []);
 
   const login = async (loginData) => {
-    setLoading(true);
     try {
       const response = await authApis.login(loginData);
-      setUser(response);
+      
+      // Extract user info from JWT response
+      const userInfo = {
+        token: response.token,
+        message: response.message,
+        // You might need to decode JWT to get user details
+        // or make a separate API call to get user profile
+      };
+      
+      setUser(userInfo);
+      localStorage.setItem('user', JSON.stringify(userInfo));
       return response;
     } catch (error) {
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const signup = async (signupData) => {
-    setLoading(true);
     try {
       const response = await authApis.signup(signupData);
       return response;
     } catch (error) {
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const logout = () => {
+    authApis.logout();
     setUser(null);
+  };
+
+  const isAuthenticated = () => {
+    const token = localStorage.getItem('jwtToken');
+    return !!token && !!user;
+  };
+
+  const hasRole = (role) => {
+    return user?.userRole === role;
+  };
+
+  const canAccessVoterServices = () => {
+    return user?.userRole === 'USER';
   };
 
   const value = {
@@ -49,6 +78,9 @@ export const AuthProvider = ({ children }) => {
     login,
     signup,
     logout,
+    isAuthenticated,
+    hasRole,
+    canAccessVoterServices,
     loading
   };
 

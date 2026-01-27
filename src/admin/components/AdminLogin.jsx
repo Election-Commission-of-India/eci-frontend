@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { eroLogin } from '../services/eroApis';
+import { adminLogin } from '../services/adminApis';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router';
 import LoadingSmall from '../../components/SmallLoading';
 
-export default function EroLogin() {
+export default function AdminLogin() {
   const [formData, setFormData] = useState({
-    emailOrMobile: '',
+    email: '',
     password: ''
   });
   const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ export default function EroLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.emailOrMobile || !formData.password) {
+    if (!formData.email || !formData.password) {
       toast.error('Please fill all required fields');
       return;
     }
@@ -30,30 +30,26 @@ export default function EroLogin() {
     try {
       setLoading(true);
 
-      const data = await eroLogin(formData);
-      console.log("Backend response:", data);
-
-      //  CLEAR ANY PREVIOUS SESSION (ADMIN / USER / BLO / ERO)
+      //  CLEAR ANY PREVIOUS SESSION (VERY IMPORTANT)
       localStorage.removeItem('authToken');
       localStorage.removeItem('authRole');
-      localStorage.removeItem('authUser');
+      localStorage.removeItem('adminUser');
 
-      //  SINGLE SOURCE OF TRUTH
-      localStorage.setItem('authToken', data.jwt);
-      localStorage.setItem('authRole', 'ROLE_ERO');
+      const data = await adminLogin(formData);
+      console.log("Backend response:", data);
 
-      // (Optional) profile info only
+      //  Store ONLY admin profile (NOT token)
       localStorage.setItem(
-        'authUser',
+        'adminUser',
         JSON.stringify({
-          emailOrMobile: formData.emailOrMobile,
-          role: 'ROLE_ERO',
+          username: data.username,
+          role: data.role,
           loginTime: new Date().toISOString()
         })
       );
 
       toast.success('Login successful');
-      navigate('/ero/dashboard');
+      navigate('/admin/dashboard');
 
     } catch (error) {
       console.error('Login error:', error);
@@ -71,23 +67,23 @@ export default function EroLogin() {
       <div className="max-w-md w-full space-y-8">
         <div className="bg-white border rounded-lg shadow-sm p-8">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">ERO Login</h2>
-            <p className="text-sm text-gray-600 mt-2">Electoral Registration Officer Portal</p>
+            <h2 className="text-2xl font-bold text-gray-900">Admin Login</h2>
+            <p className="text-sm text-gray-600 mt-2">Election Commission Admin Portal</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email or Mobile
+                Email
               </label>
               <input
-                type="text"
-                name="emailOrMobile"
-                value={formData.emailOrMobile}
+                type="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter email or mobile number"
+                placeholder="Enter admin email"
               />
             </div>
 

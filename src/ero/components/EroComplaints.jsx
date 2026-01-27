@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { getComplaints, getComplaintDetails, assignComplaintToBlo } from '../services/eroApis';
 import { toast } from 'react-toastify';
 import LoadingSmall from '../../components/SmallLoading';
@@ -19,7 +19,14 @@ export default function EroComplaints() {
     remarks: ''
   });
 
-  const complaintStatuses = ['SUBMITTED', 'ASSIGNED_TO_BLO', 'UNDER_INVESTIGATION', 'RESOLVED', 'CLOSED'];
+  // ✅ Backend-aligned enum values
+  const complaintStatuses = [
+    'REGISTERED',
+    'ASSIGNED_TO_BLO',
+    'IN_PROGRESS',
+    'RESOLVED',
+    'REJECTED'
+  ];
 
   const handleFilterChange = (e) => {
     setFilters({
@@ -43,20 +50,25 @@ export default function EroComplaints() {
       }
     } catch (error) {
       toast.error('Failed to fetch complaints');
-      console.error('Complaints error:', error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
   const viewComplaintDetails = async (complaintId) => {
+    if (!complaintId) {
+      toast.error('Invalid complaint ID');
+      return;
+    }
+
     try {
       setDetailsLoading(true);
       const data = await getComplaintDetails(complaintId);
       setSelectedComplaint(data);
     } catch (error) {
       toast.error('Failed to load complaint details');
-      console.error('Complaint details error:', error);
+      console.error(error);
     } finally {
       setDetailsLoading(false);
     }
@@ -93,194 +105,133 @@ export default function EroComplaints() {
       });
       toast.success('Complaint assigned to BLO successfully');
       closeAssignmentModal();
-      fetchComplaints(); // Refresh the list
+      fetchComplaints();
     } catch (error) {
-      toast.error('Failed to assign complaint to BLO');
-      console.error('Assignment error:', error);
+      toast.error('Failed to assign complaint');
+      console.error(error);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'RESOLVED':
+        return 'bg-green-100 text-green-800';
+      case 'ASSIGNED_TO_BLO':
+        return 'bg-blue-100 text-blue-800';
+      case 'IN_PROGRESS':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'REJECTED':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   return (
     <div className="p-6">
+      {/* Filters */}
       <div className="bg-white border rounded-md p-4 shadow-sm mb-6">
-        <h1 className="text-xl font-semibold text-gray-800">Complaints Management</h1>
-        <p className="text-sm text-gray-600">View and manage citizen complaints</p>
-      </div>
+        <h3 className="text-lg font-medium mb-4">Filters</h3>
 
-      {/* Filters Section */}
-      <div className="bg-white border rounded-md p-4 shadow-sm mb-6">
-        <h3 className="text-lg font-medium text-gray-800 mb-4">Filters</h3>
-        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Constituency ID <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              name="constituencyId"
-              value={filters.constituencyId}
-              onChange={handleFilterChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter constituency ID"
-            />
-          </div>
+          <input
+            type="number"
+            name="constituencyId"
+            placeholder="Constituency ID"
+            value={filters.constituencyId}
+            onChange={handleFilterChange}
+            className="border px-3 py-2 rounded-md"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status
-            </label>
-            <select
-              name="status"
-              value={filters.status}
-              onChange={handleFilterChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Status</option>
-              {complaintStatuses.map(status => (
-                <option key={status} value={status}>{status.replace(/_/g, ' ')}</option>
-              ))}
-            </select>
-          </div>
+          <select
+            name="status"
+            value={filters.status}
+            onChange={handleFilterChange}
+            className="border px-3 py-2 rounded-md"
+          >
+            <option value="">All Status</option>
+            {complaintStatuses.map(status => (
+              <option key={status} value={status}>
+                {status.replace(/_/g, ' ')}
+              </option>
+            ))}
+          </select>
 
-          <div className="flex items-end">
-            <button
-              onClick={fetchComplaints}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Load Complaints
-            </button>
-          </div>
+          <button
+            onClick={fetchComplaints}
+            className="bg-blue-600 text-white rounded-md px-4 py-2"
+          >
+            Load Complaints
+          </button>
         </div>
       </div>
 
+      {/* Complaints List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Complaints List */}
-        <div className="bg-white border rounded-md shadow-sm">
-          <div className="bg-blue-100 text-blue-900 px-4 py-2 font-medium rounded-t-md">
+        <div className="bg-white border rounded-md">
+          <div className="bg-blue-100 px-4 py-2 font-medium">
             Complaints ({complaints.length})
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center p-8">
-              <LoadingSmall size="lg" />
-            </div>
-          ) : complaints.length === 0 ? (
-            <div className="text-center p-8 text-gray-500">
-              No complaints found. Use filters to search for complaints.
+            <div className="p-6 text-center">
+              <LoadingSmall />
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
-              {complaints.map((complaint) => (
-                <div key={complaint.id} className="p-4 hover:bg-gray-50">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">#{complaint.id}</h4>
-                      <p className="text-sm text-gray-600 mt-1">{complaint.subject}</p>
-                      <div className="flex items-center gap-4 mt-2">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          complaint.status === 'RESOLVED' ? 'bg-green-100 text-green-800' :
-                          complaint.status === 'ASSIGNED_TO_BLO' ? 'bg-blue-100 text-blue-800' :
-                          complaint.status === 'UNDER_INVESTIGATION' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {complaint.status?.replace(/_/g, ' ')}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {complaint.submissionDate ? new Date(complaint.submissionDate).toLocaleDateString() : ''}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-2 mt-3">
-                    <button
-                      onClick={() => viewComplaintDetails(complaint.id)}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      View Details
-                    </button>
-                    {complaint.status === 'SUBMITTED' && (
-                      <button
-                        onClick={() => openAssignmentModal(complaint.id)}
-                        className="text-green-600 hover:text-green-800 text-sm font-medium"
-                      >
-                        Assign to BLO
-                      </button>
-                    )}
-                  </div>
+            complaints.map(c => (
+              <div key={c.complaintId} className="p-4 border-b">
+                <h4 className="font-medium">#{c.complaintId}</h4>
+                <p className="text-sm">{c.subject}</p>
+
+                <span className={`inline-block mt-2 px-2 py-1 text-xs rounded-full ${getStatusBadge(c.complaintStatus)}`}>
+                  {c.complaintStatus.replace(/_/g, ' ')}
+                </span>
+
+                <div className="text-xs text-gray-500 mt-1">
+                  {new Date(c.createdAt).toLocaleDateString()}
                 </div>
-              ))}
-            </div>
+
+                <div className="flex gap-3 mt-3">
+                  <button
+                    onClick={() => viewComplaintDetails(c.complaintId)}
+                    className="text-blue-600 text-sm"
+                  >
+                    View Details
+                  </button>
+
+                  {c.complaintStatus === 'REGISTERED' && (
+                    <button
+                      onClick={() => openAssignmentModal(c.complaintId)}
+                      className="text-green-600 text-sm"
+                    >
+                      Assign to BLO
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
           )}
         </div>
 
-        {/* Complaint Details */}
-        <div className="bg-white border rounded-md shadow-sm">
-          <div className="bg-blue-100 text-blue-900 px-4 py-2 font-medium rounded-t-md">
+        {/* Details */}
+        <div className="bg-white border rounded-md">
+          <div className="bg-blue-100 px-4 py-2 font-medium">
             Complaint Details
           </div>
 
           {detailsLoading ? (
-            <div className="flex justify-center items-center p-8">
-              <LoadingSmall size="lg" />
+            <div className="p-6 text-center">
+              <LoadingSmall />
             </div>
           ) : selectedComplaint ? (
-            <div className="p-4 space-y-4">
-              <div>
-                <h4 className="font-medium text-gray-900">Complaint #{selectedComplaint.id}</h4>
-                <p className="text-sm text-gray-600">{selectedComplaint.subject}</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
-                <p className="text-sm text-gray-900 mt-1">{selectedComplaint.description}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                    selectedComplaint.status === 'RESOLVED' ? 'bg-green-100 text-green-800' :
-                    selectedComplaint.status === 'ASSIGNED_TO_BLO' ? 'bg-blue-100 text-blue-800' :
-                    selectedComplaint.status === 'UNDER_INVESTIGATION' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {selectedComplaint.status?.replace(/_/g, ' ')}
-                  </span>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Priority</label>
-                  <p className="text-sm text-gray-900 mt-1">{selectedComplaint.priority || 'N/A'}</p>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Complainant Details</label>
-                <div className="text-sm text-gray-900 mt-1">
-                  <p>Name: {selectedComplaint.complainantName}</p>
-                  <p>Mobile: {selectedComplaint.complainantMobile}</p>
-                  <p>Email: {selectedComplaint.complainantEmail}</p>
-                </div>
-              </div>
-
-              {selectedComplaint.assignedBloName && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Assigned BLO</label>
-                  <p className="text-sm text-gray-900 mt-1">{selectedComplaint.assignedBloName}</p>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Submission Date</label>
-                <p className="text-sm text-gray-900 mt-1">
-                  {selectedComplaint.submissionDate ? new Date(selectedComplaint.submissionDate).toLocaleDateString() : 'N/A'}
-                </p>
-              </div>
+            <div className="p-4 space-y-3">
+              <h4 className="font-medium">
+                Complaint #{selectedComplaint.complaintId}
+              </h4>
+              <p>{selectedComplaint.description}</p>
             </div>
           ) : (
-            <div className="text-center p-8 text-gray-500">
+            <div className="p-6 text-gray-500 text-center">
               Select a complaint to view details
             </div>
           )}
@@ -289,48 +240,39 @@ export default function EroComplaints() {
 
       {/* Assignment Modal */}
       {assignmentModal.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Assign Complaint to BLO</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  BLO ID <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  value={assignmentModal.bloId}
-                  onChange={(e) => setAssignmentModal({...assignmentModal, bloId: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter BLO ID"
-                />
-              </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-md w-96">
+            <h3 className="font-medium mb-4">Assign to BLO</h3>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Remarks
-                </label>
-                <textarea
-                  value={assignmentModal.remarks}
-                  onChange={(e) => setAssignmentModal({...assignmentModal, remarks: e.target.value})}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter assignment remarks (optional)"
-                />
-              </div>
-            </div>
+            <input
+              type="number"
+              placeholder="BLO ID"
+              value={assignmentModal.bloId}
+              onChange={e =>
+                setAssignmentModal({ ...assignmentModal, bloId: e.target.value })
+              }
+              className="border px-3 py-2 w-full mb-3"
+            />
 
-            <div className="flex gap-3 mt-6">
+            <textarea
+              placeholder="Remarks"
+              value={assignmentModal.remarks}
+              onChange={e =>
+                setAssignmentModal({ ...assignmentModal, remarks: e.target.value })
+              }
+              className="border px-3 py-2 w-full mb-3"
+            />
+
+            <div className="flex gap-3">
               <button
                 onClick={handleAssignToBlo}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md"
               >
                 Assign
               </button>
               <button
                 onClick={closeAssignmentModal}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                className="border px-4 py-2 rounded-md"
               >
                 Cancel
               </button>

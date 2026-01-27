@@ -35,18 +35,27 @@ export default function EroApplications() {
 
     try {
       setLoading(true);
+      setApplications([]);
+
       const data = await getApplicationsByConstituency(filters.constituencyId);
       setApplications(data);
+
       if (data.length === 0) {
         toast.info('No applications found for this constituency');
       }
     } catch (error) {
-      toast.error('Failed to fetch applications');
+      setApplications([]);
+      if (error.response?.status === 404) {
+        toast.info('No applications found for this constituency');
+      } else {
+        toast.error('Failed to fetch applications');
+      }
       console.error('Applications error:', error);
     } finally {
       setLoading(false);
     }
   };
+
 
   const applyFilters = async () => {
     try {
@@ -78,7 +87,7 @@ export default function EroApplications() {
       {/* Filters Section */}
       <div className="bg-white border rounded-md p-4 shadow-sm mb-6">
         <h3 className="text-lg font-medium text-gray-800 mb-4">Filters</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -94,7 +103,7 @@ export default function EroApplications() {
             />
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Status
             </label>
@@ -140,9 +149,9 @@ export default function EroApplications() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="BLO ID"
             />
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               From Date
             </label>
@@ -153,9 +162,9 @@ export default function EroApplications() {
               onChange={handleFilterChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               To Date
             </label>
@@ -166,7 +175,7 @@ export default function EroApplications() {
               onChange={handleFilterChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
+          </div> */}
         </div>
 
         <div className="flex gap-3 mt-4">
@@ -176,12 +185,12 @@ export default function EroApplications() {
           >
             Load by Constituency
           </button>
-          <button
+          {/* <button
             onClick={applyFilters}
             className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
           >
             Apply Filters
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -213,35 +222,48 @@ export default function EroApplications() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {applications.map((app) => (
-                  <tr key={app.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">{app.id}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{app.applicantName || app.fullName}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{app.formType}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        app.applicationStatus === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                        app.applicationStatus === 'REJECTED' ? 'bg-red-100 text-red-800' :
-                        app.applicationStatus === 'UNDER_REVIEW' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {app.applicationStatus}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {app.submissionDate ? new Date(app.submissionDate).toLocaleDateString() : '-'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => viewApplicationDetails(app.id)}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                      >
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {applications.map((app) => {
+                  console.log('APP OBJECT ', app);
+
+                  return (
+                    <tr key={app.applicationId} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm text-gray-900">{app.applicationId}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">
+                        {app.applicantName || app.fullName}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{app.formType}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${app.applicationStatus === 'APPROVED'
+                            ? 'bg-green-100 text-green-800'
+                            : app.applicationStatus === 'REJECTED'
+                              ? 'bg-red-100 text-red-800'
+                              : app.applicationStatus === 'UNDER_REVIEW'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}
+                        >
+                          {app.applicationStatus}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900">
+                        {app.submissionDate
+                          ? new Date(app.submissionDate).toLocaleDateString()
+                          : '-'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => viewApplicationDetails(app.applicationId)}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
+
             </table>
           </div>
         )}

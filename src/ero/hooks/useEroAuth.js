@@ -5,15 +5,21 @@ export const useEroAuth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('eroToken');
+    const token = localStorage.getItem('jwtToken');
     if (!token) {
       navigate('/ero/login');
     }
   }, [navigate]);
 
   const isAuthenticated = () => {
-    return !!localStorage.getItem('eroToken');
+    return !!localStorage.getItem('jwtToken');
   };
 
-  return { isAuthenticated };
+  const logout = () => {
+    localStorage.removeItem('jwtToken');
+    localStorage.removeItem('eroUser');
+    navigate('/ero/login');
+  };
+
+  return { isAuthenticated, logout };
 };

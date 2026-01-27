@@ -1,6 +1,13 @@
 import { Link } from "react-router";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Header() {
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
     <header className="bg-white shadow-sm border-b border-black-200">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -24,19 +31,35 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-3 md:gap-4">
-            <Link
-              to="/login"
-              className="flex items-center gap-2 text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors"
-            >
-              Login
-            </Link>
+            {isAuthenticated() ? (
+              <>
+                <span className="text-sm md:text-base text-gray-700">
+                  Welcome, User
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="flex bg-red-100 hover:bg-red-200 p-2 rounded-md items-center gap-2 text-sm md:text-base text-red-700 hover:text-red-800 font-medium transition-colors"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="flex items-center gap-2 text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                >
+                  Login
+                </Link>
 
-            <Link
-              to="/signup"
-              className="flex  bg-gray-200  p-2  rounded-md items-center gap-2 text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors"
-            >
-              Sign-Up
-            </Link>
+                <Link
+                  to="/signup"
+                  className="flex  bg-gray-200  p-2  rounded-md items-center gap-2 text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                >
+                  Sign-Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
