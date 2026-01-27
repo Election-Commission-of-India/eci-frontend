@@ -1,6 +1,7 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 export default function Header() {
+  const navigate = useNavigate();
   return (
     <header className="bg-white shadow-sm border-b border-black-200">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -40,8 +41,12 @@ export default function Header() {
           </div>
         </div>
 
-        <div className="md:hidden pb-2 border-t border-gray-100 pt-2">
-          <div className="flex flex-col text-center">
+        <div onClick={()=>{
+
+          navigate("/home");
+
+        }} className="md:hidden pb-2 border-t border-gray-100 pt-2">
+          <div  className="flex flex-col text-center">
             <span className="text-xs font-semibold text-gray-700">
               मतदाता सेवा पोर्टल
             </span>

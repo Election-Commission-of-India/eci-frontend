@@ -15,6 +15,7 @@ const Footer = () => {
           <a href="/contact" className="hover:text-black hover:underline font-medium">
             Contact
           </a>
+          
         </div>
       </div>
     </footer>
