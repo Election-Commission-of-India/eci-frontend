@@ -5,14 +5,17 @@ import App from "./App.jsx";
 import { RecoilRoot } from "recoil";
 import { BrowserRouter } from "react-router";
 import { Provider } from "react-redux";
-import store  from "./store/store.js";
+import store from "./store/store.js";
+import { AuthProvider } from "./contexts/AuthContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <RecoilRoot>
         <Provider store={store}>
-          <App />
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </Provider>
       </RecoilRoot>
     </BrowserRouter>
