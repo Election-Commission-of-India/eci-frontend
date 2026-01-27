@@ -63,8 +63,12 @@ export default function Header() {
           </div>
         </div>
 
-        <div className="md:hidden pb-2 border-t border-gray-100 pt-2">
-          <div className="flex flex-col text-center">
+        <div onClick={()=>{
+
+          navigate("/home");
+
+        }} className="md:hidden pb-2 border-t border-gray-100 pt-2">
+          <div  className="flex flex-col text-center">
             <span className="text-xs font-semibold text-gray-700">
               मतदाता सेवा पोर्टल
             </span>

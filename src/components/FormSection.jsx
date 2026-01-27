@@ -16,9 +16,13 @@ function FormSection() {
         <GenericActionCard
           title="New Voter Registration"
           description="Fill Form 6 if you are 18 years or above."
-          primaryAction={{ label: "Fill Form 6", onClick: () => { navigate("/form6")} }}
-         
-         imageSrc={voterImg}
+          primaryAction={{
+            label: "Fill Form 6",
+            onClick: () => {
+              navigate("/form6");
+            },
+          }}
+          imageSrc={voterImg}
           theme={{
             border: "border-pink-400",
             bg: "bg-pink-50",
@@ -28,9 +32,9 @@ function FormSection() {
         />
 
         <GenericActionCard
-          title={"Correction of Enties"}
+          title={"Correction of Entries"}
           description={
-            "Fill Form 8 to get EPIC with updated or replacement or marking of PwD."
+            "Fill Form 8 to correct personal details such as name, age, address, or other information in the existing electoral roll."
           }
           imageSrc={
             "https://voters.eci.gov.in/static/media/form8Filled.a087b41a5768be7e375ada95a730025f.svg"
@@ -39,14 +43,32 @@ function FormSection() {
             label: "Fill Form 8",
             onClick: () => navigate("/form8"),
           }}
-            theme={{
+          theme={{
             border: "border-green-400",
             bg: "bg-green-50",
             iconBg: "bg-green-200",
             primaryBtn: "bg-green-500 hover:bg-green-600",
           }}
         />
-        <GenericActionCard />
+        <GenericActionCard
+          title={"Deletion"}
+          description={
+            "Fill Form 7 to get name deleted from the existing electoral roll."
+          }
+          imageSrc={
+            "https://voters.eci.gov.in/static/media/form7Filled.fad310a3d75fcbef046d3cd1cb189b78.svg"
+          }
+          primaryAction={{
+            label: "Fill Form 7",
+            onClick: () => navigate("/home"),
+          }}
+          theme={{
+            border: "border-red-400",
+            bg: "bg-red-50",
+            iconBg: "bg-red-200",
+            primaryBtn: "bg-red-500 hover:bg-red-600",
+          }}
+        />
       </div>
     </div>
   );

@@ -28,3 +28,20 @@ export const applicationAPI = {
   submitCorrection,
   getVoterByEpic,
 };
+
+export const complaintAPI = {
+  createComplaint: async (data) => {
+    const response = await apiClient.post("/complaints", data);
+    return response.data;
+  },
+
+  getComplaint: async (id) => {
+    const response = await apiClient.get(`/complaints/${id}`);
+    return response.data;
+  },
+
+  assignBlo: async (id) => {
+    const response = await apiClient.post(`complaints/${id}/assign-blo`);
+    return response.data;
+  },
+};
