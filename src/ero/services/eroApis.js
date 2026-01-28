@@ -2,7 +2,7 @@ import apiClient from '../../services/apis.js';
 
 // ERO Authentication with JWT
 export const eroLogin = async (loginData) => {
-  const response = await apiClient.post('/api/ero/login', loginData);
+  const response = await apiClient.post('/ero/login', loginData);
 
   // Store JWT token if login successful
   if (response.data.jwt) {
@@ -14,19 +14,19 @@ export const eroLogin = async (loginData) => {
 
 // ERO Dashboard (requires JWT)
 export const getEroDashboard = async () => {
-  const response = await apiClient.get('/api/ero/dashboard');
+  const response = await apiClient.get('/ero/dashboard');
   return response.data;
 };
 
 // ERO Voters (requires JWT)
 export const getAllVoters = async () => {
-  const response = await apiClient.get('/api/ero/voters');
+  const response = await apiClient.get('/ero/voters');
   return response.data;
 };
 
 // ERO Applications (requires JWT)
 export const getApplicationsByConstituency = async (constituencyId) => {
-  const response = await apiClient.get(`/api/ero/applications/constituency/${constituencyId}`);
+  const response = await apiClient.get(`/ero/applications/constituency/${constituencyId}`);
   return response.data;
 };
 
@@ -39,18 +39,18 @@ export const filterApplications = async (filters) => {
     }
   });
 
-  const response = await apiClient.get('/api/ero/applications/filter', { params });
+  const response = await apiClient.get('/ero/applications/filter', { params });
   return response.data;
 };
 
 export const getApplicationWithBlo = async (applicationId) => {
-  const response = await apiClient.get(`/api/ero/applications/${applicationId}/blo-review`);
+  const response = await apiClient.get(`/ero/applications/${applicationId}/blo-review`);
   return response.data;
 };
 
 // ERO BLO Assignment (requires JWT)
 export const assignBloToBooth = async (assignmentData) => {
-  const response = await apiClient.post('/api/ero/blo/assign-blo', null, {
+  const response = await apiClient.post('/ero/blo/assign-blo', null, {
     params: assignmentData
   });
   return response.data;
