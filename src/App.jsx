@@ -59,6 +59,7 @@ function App() {
             <Route path="/my-applications" element={<MyApplications />} />
             <Route path="/application/:id" element={<ApplicationDetails />} />
             <Route path="/complaints/track" element ={<TrackComplaint />}/>
+            
           </Routes>
         </main>
 

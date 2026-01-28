@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router";
 import { documentApis } from "../services/documentApis";
 import { toast } from "react-toastify";
 import LoadingSmall from "../components/SmallLoading";
+import ApplicationSuccessModal from "./ApplicationComplete";
 
 
 const FORM6_MANDATORY_DOCS = [
@@ -30,6 +31,9 @@ export default function UploadDocuments() {
   const { applicationId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [applicationNumberState, setApplicationNumber] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [uploadedDocs, setUploadedDocs] = useState({});
   const [uploadingDoc, setUploadingDoc] = useState(null);
@@ -101,14 +105,20 @@ export default function UploadDocuments() {
       return;
     }
 
-    setAllSubmitted(true);
+    setApplicationNumber(applicationNumber);
+    setShowSuccessModal(true);
+    // setAllSubmitted(true);
+
     toast.success("All documents submitted successfully!");
+
+
+
     
     // Navigate to completion page with replace
-    navigate(`/application/${applicationNumber}/complete`, {
-      replace: true,
-      state: { applicationNumber },
-    });
+    // navigate(`/application/${applicationNumber}/complete`, {
+    //   replace: true,
+    //   state: { applicationNumber },
+    // });
   };
 
 
@@ -238,6 +248,8 @@ export default function UploadDocuments() {
           Complete Application Submission
         </button>
       </div>
+
+      <ApplicationSuccessModal isOpen={showSuccessModal}onClose={()=> setShowSuccessModal(false) } applicationNumber={applicationNumber}/>
     </div>
   );
 }

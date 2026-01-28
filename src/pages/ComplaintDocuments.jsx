@@ -3,6 +3,8 @@ import { useParams, useNavigate, useLocation } from "react-router";
 import { complaintDocumentApis } from "../services/complaintDocumentApis";
 import { toast } from "react-toastify";
 import LoadingSmall from "../components/SmallLoading";
+import ApplicationSuccessModal from "./ApplicationComplete";
+import CommplaintSuccessModal from "./ComplaintSuccess";
 
 export default function UploadComplaintDocuments() {
   const { complaintId } = useParams();
@@ -16,6 +18,9 @@ export default function UploadComplaintDocuments() {
   const [uploading, setUploading] = useState(false);
   const [allSubmitted, setAllSubmitted] = useState(false);
   const [loadingExisting, setLoadingExisting] = useState(false);
+   const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [applicationNumberState, setApplicationNumber] = useState("");
+    const [loading, setLoading] = useState(false);
 
   // Fetch existing documents on mount
   useEffect(() => {
@@ -24,6 +29,7 @@ export default function UploadComplaintDocuments() {
       try {
         const response = await complaintDocumentApis.getDocuments(complaintId);
         if (response.success && response.data) {
+          
           setUploadedDocs(response.data);
         }
       } catch (error) {
@@ -115,25 +121,27 @@ export default function UploadComplaintDocuments() {
   };
 
   const handleSkipOrComplete = () => {
-    setAllSubmitted(true);
+  setShowSuccessModal(true);
+  setApplicationNumber(complaintNumber)
+
     toast.success("Complaint registered successfully!");
 
-    navigate(`/complaints/success`, {
-      replace: true,
-      state: { complaintId, complaintNumber },
-    });
+    // navigate(`/complaints/success`, {
+    //   replace: true,
+    //   state: { complaintId, complaintNumber },
+    // });
   };
 
-  if (allSubmitted) {
-    return (
-      <div className="max-w-4xl mx-auto p-4">
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-          <p className="font-medium">Complaint registered successfully!</p>
-          <p className="text-sm mt-1">Redirecting...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (allSubmitted) {
+  //   return (
+  //     <div className="max-w-4xl mx-auto p-4">
+  //       <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+  //         <p className="font-medium">Complaint registered successfully!</p>
+  //         <p className="text-sm mt-1">Redirecting...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
@@ -291,6 +299,8 @@ export default function UploadComplaintDocuments() {
           {uploadedDocs.length > 0 ? "Complete Submission" : "Skip & Complete"}
         </button>
       </div>
+
+      <CommplaintSuccessModal isOpen={showSuccessModal} applicationNumber={applicationNumberState} onClose={()=> setShowSuccessModal(false)}/>
     </div>
   );
 }
