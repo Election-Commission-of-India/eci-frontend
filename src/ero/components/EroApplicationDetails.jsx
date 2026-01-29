@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { getApplicationWithBlo } from '../services/eroApis';
+import { getApplicationWithBlo, generateEpic } from '../services/eroApis';
 import { toast } from 'react-toastify';
 import LoadingSmall from '../../components/SmallLoading';
 
@@ -8,6 +8,7 @@ export default function EroApplicationDetails() {
   const { applicationId } = useParams();
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [epicGenerating, setEpicGenerating] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,6 +48,28 @@ export default function EroApplicationDetails() {
       console.error('Application details error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateEpic = async () => {
+    try {
+      setEpicGenerating(true);
+      const response = await generateEpic(applicationId);
+
+      toast.success(`EPIC Generated Successfully! EPIC Number: ${response.epicNumber}`);
+
+      // Update application state with new EPIC number
+      setApplication(prev => ({
+        ...prev,
+        epicNumber: response.epicNumber,
+        applicationStatus: 'EPIC_GENERATED'
+      }));
+
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to generate EPIC';
+      toast.error(errorMessage);
+    } finally {
+      setEpicGenerating(false);
     }
   };
 
@@ -110,6 +133,7 @@ export default function EroApplicationDetails() {
         <InfoCard title="Application Information">
           <InfoRow label="Form Type" value={application.formType} />
           <InfoRow label="Status" value={application.applicationStatus} />
+          <InfoRow label="EPIC Number" value={application.epicNumber || 'Not Generated'} />
           <InfoRow label="Submission Date" value={
             application.submissionDate ? new Date(application.submissionDate).toLocaleDateString() : 'N/A'
           } />
@@ -174,13 +198,40 @@ export default function EroApplicationDetails() {
           View Documents
         </button>
 
+        {/* EPIC Generation Button */}
+        {application.applicationStatus === 'APPROVED' && !application.epicNumber && (
+          <button
+            onClick={handleGenerateEpic}
+            disabled={epicGenerating}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {epicGenerating ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Generating EPIC...
+              </>
+            ) : (
+              'Generate EPIC'
+            )}
+          </button>
+        )}
+
+        {/* EPIC Generated Status */}
+        {application.epicNumber && (
+          <div className="flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-md">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            ✔ EPIC Generated: {application.epicNumber}
+          </div>
+        )}
+
         {application.applicationStatus === 'SUBMITTED' && (
           <button
             onClick={() => {
-              // Handle application approval/rejection logic
               toast.info('Application review functionality to be implemented');
             }}
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700"
           >
             Review Application
           </button>

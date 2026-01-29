@@ -18,7 +18,7 @@ export default function AdminDocumentTypeManagement() {
     e.preventDefault();
     try {
       const response = await createDocumentType(formData);
-      
+
       if (response.success) {
         toast.success(response.message);
         setShowCreateModal(false);
@@ -79,12 +79,12 @@ export default function AdminDocumentTypeManagement() {
           <h1 className="text-2xl font-bold text-gray-900">Document Type Management</h1>
           <p className="text-gray-600">Configure document types and validation rules</p>
         </div>
-        <button
+        {/* <button
           onClick={() => setShowCreateModal(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
         >
           Create Document Type
-        </button>
+        </button> */}
       </div>
 
       {/* Info Card */}

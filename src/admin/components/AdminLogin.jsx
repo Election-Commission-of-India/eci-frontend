@@ -30,31 +30,23 @@ export default function AdminLogin() {
     try {
       setLoading(true);
 
-      //  CLEAR ANY PREVIOUS SESSION (VERY IMPORTANT)
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('authRole');
-      localStorage.removeItem('adminUser');
-
       const data = await adminLogin(formData);
       console.log("Backend response:", data);
 
-      //  Store ONLY admin profile (NOT token)
-      localStorage.setItem(
-        'adminUser',
-        JSON.stringify({
-          username: data.username,
-          role: data.role,
-          loginTime: new Date().toISOString()
-        })
-      );
+      // Store admin user info (no JWT token from backend)
+      localStorage.setItem('adminUser', JSON.stringify({
+        username: data.username,
+        role: data.role,
+        message: data.message,
+        loginTime: new Date().toISOString()
+      }));
 
       toast.success('Login successful');
       navigate('/admin/dashboard');
 
     } catch (error) {
       console.error('Login error:', error);
-      const errorMessage =
-        error.response?.data || 'Login failed. Please check your credentials.';
+      const errorMessage = error.response?.data || 'Login failed. Please check your credentials.';
       toast.error(errorMessage);
     } finally {
       setLoading(false);

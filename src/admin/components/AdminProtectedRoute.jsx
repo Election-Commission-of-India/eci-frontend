@@ -14,7 +14,6 @@ export default function AdminProtectedRoute({ children }) {
       if (token && authRole === 'ROLE_ADMIN') {
         setIsAuthenticated(true);
       } else {
-        // Not authenticated or not admin, redirect to login
         localStorage.removeItem('authToken');
         localStorage.removeItem('authRole');
         localStorage.removeItem('adminUser');

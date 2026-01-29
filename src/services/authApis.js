@@ -1,40 +1,107 @@
-import apiClient from './apis.js';
+import api from "./apiInterceptor";
 
-// User Authentication APIs with JWT
-export const authApis = {
-  // User Login - returns JWT token
-  login: async (loginData) => {
-    const response = await apiClient.post('/users/api/login', loginData);
+const AUTH_API_URL = "/api/users"; // ✅ Added /api prefix
 
-    // Store JWT token if login successful
-    if (response.data.jwt) {
-      localStorage.setItem('jwtToken', response.data.jwt);
+const authService = {
+  // Register new user
+  register: async (userData) => {
+    try {
+      const response = await api.post(`${AUTH_API_URL}/adduser`, userData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || "Registration failed";
     }
-
-    return response.data;
   },
 
-  // User Signup
-  signup: async (signupData) => {
-    const response = await apiClient.post('/users/api/adduser', signupData);
-    return response.data;
+  // Login user
+  login: async (credentials) => {
+    try {
+      const response = await api.post(`${AUTH_API_URL}/login`, credentials);
+
+      if (response.data.jwt) {
+        // Store JWT token
+        localStorage.setItem("jwtToken", response.data.jwt);
+
+        // Decode JWT to get user info
+        const userInfo = decodeToken(response.data.jwt);
+        localStorage.setItem("user", JSON.stringify(userInfo));
+      }
+
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || "Login failed";
+    }
   },
 
-  // Get User Profile (requires JWT)
+  // Logout user
+  logout: async () => {
+    try {
+      await api.post(`${AUTH_API_URL}/logout`); // ✅ Fixed URL
+    } catch (error) {
+      console.error("Logout API error:", error);
+    } finally {
+      // Always clear local storage
+      localStorage.removeItem("jwtToken");
+      localStorage.removeItem("user");
+    }
+  },
+
+  // Get user profile
   getUserProfile: async (userId) => {
-    const response = await apiClient.get(`/users/api/profile/${userId}`);
-    return response.data;
+    try {
+      const response = await api.get(`${AUTH_API_URL}/profile/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || "Failed to fetch profile";
+    }
   },
 
-  // Update User Profile (requires JWT)
-  updateProfile: async (userId, updateData) => {
-    const response = await apiClient.put(`/users/api/updateprofile/${userId}`, updateData);
-    return response.data;
+  // Update user profile
+  updateProfile: async (userId, profileData) => {
+    try {
+      const response = await api.put(
+        `${AUTH_API_URL}/updateprofile/${userId}`,
+        profileData,
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || "Failed to update profile";
+    }
   },
 
-  // Logout - clear tokens
-  logout: () => {
-    localStorage.removeItem('jwtToken');
-    localStorage.removeItem('user');
+  // Check if user is authenticated
+  isAuthenticated: () => {
+    return !!localStorage.getItem("jwtToken");
+  },
+
+  // Get current user from localStorage
+  getCurrentUser: () => {
+    const userStr = localStorage.getItem("user");
+    return userStr ? JSON.parse(userStr) : null;
+  },
+
+  // Get JWT token
+  getToken: () => {
+    return localStorage.getItem("jwtToken");
+  },
+};
+
+// Helper function to decode JWT (basic decode, not verification)
+const decodeToken = (token) => {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(""),
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
   }
 };
+
+export default authService;

@@ -20,11 +20,11 @@ import ComplaintSuccess from "./pages/ComplaintSuccess";
 import MyApplications from "./pages/MyApplication";
 import ApplicationDetails from "./pages/ApplicationDetail";
 import TrackComplaint from "./pages/TrackComplaint";
-
-// Authentication
+import LoginPage from "./pages/Login";
+import Register from "./pages/RegisterPage";
 import { AuthProvider } from "./contexts/AuthContext";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+
+
 
 // ERO Components
 import EroLoginPage from "./ero/pages/EroLoginPage";
@@ -60,9 +60,7 @@ function App() {
     <AuthProvider>
       <div>
         <Routes>
-          {/* Authentication Routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+
 
           {/* Public Routes */}
           <Route path="/*" element={
@@ -194,8 +192,6 @@ function App() {
 
       </Routes>
 
-      <ToastContainer limit={2000} />
-    </div>
   );
 }
 

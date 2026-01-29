@@ -19,14 +19,15 @@ export default function EroComplaints() {
     remarks: ''
   });
 
-  // ✅ Backend-aligned enum values
   const complaintStatuses = [
     'REGISTERED',
-    'ASSIGNED_TO_BLO',
-    'IN_PROGRESS',
+    'ASSIGNED',
+    'UNDER_INVESTIGATION',
     'RESOLVED',
-    'REJECTED'
+    'CLOSED'
   ];
+
+
 
   const handleFilterChange = (e) => {
     setFilters({
