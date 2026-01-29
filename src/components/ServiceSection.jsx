@@ -20,6 +20,7 @@ function ServiceSection() {
             iconBg: "bg-blue-200",
             primaryBtn: "bg-blue-500 hover:bg-blue-600",
             }}/>
+
         <GenericActionCard title={"Track Application Status"} description={"Track all your form status here."} imageSrc={
           "https://voters.eci.gov.in/static/media/trackApplication.44d58f300a875a5c5732.png"
         } primaryAction={{ label: "Track", onClick: () => { navigate("/track/status") } }}  theme={{
@@ -29,6 +30,7 @@ function ServiceSection() {
             primaryBtn: "bg-orange-500 hover:bg-orange-600",
             }}  />
         <GenericActionCard />
+=
       </div>
     </div>
   );

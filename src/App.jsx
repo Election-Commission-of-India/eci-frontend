@@ -37,16 +37,23 @@ import EroBloAssignmentPage from "./ero/pages/EroBloAssignmentPage";
 import EroComplaintsPage from "./ero/pages/EroComplaintsPage";
 import EroDocumentsPage from "./ero/pages/EroDocumentsPage";
 
+// BLO Components
+import BloLoginPage from "./blo/pages/BloLoginPage";
+import BloLayout from "./blo/components/BloLayout";
+import BloDashboardPage from "./blo/pages/BloDashboardPage";
+import BloProfilePage from "./blo/pages/BloProfilePage";
+import AssignedApplicationsPage from "./blo/pages/AssignedApplicationsPage";
+import ApplicationDetailsPage from "./blo/pages/ApplicationDetailsPage";
+import ApplicationDocumentsPage from "./blo/pages/ApplicationDocumentsPage";
+import ApplicationRecommendationPage from "./blo/pages/ApplicationRecommendationPage";
+import BloAuthGuard from "./blo/components/BloAuthGuard";
+
+// Voter Search Components
+import VoterSearch from "./pages/voter/VoterSearch";
+import VoterDetails from "./pages/voter/VoterDetails";
+
 // Admin Components
-import AdminLoginPage from "./admin/pages/AdminLoginPage";
-import AdminLayout from "./admin/components/AdminLayout";
-import AdminDashboardPage from "./admin/pages/AdminDashboardPage";
-import AdminUserManagementPage from "./admin/pages/AdminUserManagementPage";
-import AdminConstituencyManagementPage from "./admin/pages/AdminConstituencyManagementPage";
-import AdminPollingStationManagementPage from "./admin/pages/AdminPollingStationManagementPage";
-import AdminDocumentTypeManagementPage from "./admin/pages/AdminDocumentTypeManagementPage";
-import AdminProtectedRoute from "./admin/components/AdminProtectedRoute";
-import { AuthProvider } from "./contexts/AuthContext";
+import AuditLogs from "./pages/admin/AuditLogs";
 
 function App() {
   return (
@@ -114,16 +121,12 @@ function App() {
       </div>
     </AuthProvider>
     <div>
-      <div className="flex flex-col min-h-screen">
-        {/* Navbar */}
-
-        {/* Main Content - Takes up remaining space */}
-        <AuthProvider>
-        <Header />
-          <main className="flex-grow">
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/*" element={
+          <div>
+            <Header />
             <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<Register />} />
               <Route path="/home" element={<Home />} />
               <Route path="/form6" element={<VoterRegistration />} />
               <Route path="/form6/preview" element={<Form6Preview />} />
@@ -135,34 +138,59 @@ function App() {
                 path="/form8/:applicationId/uploaddoc"
                 element={<UploadSupportingDocuments />}
               />
-
               <Route path="/form8" element={<VoterCorrection />} />
               <Route path="/complaint" element={<Complaint />} />
               <Route path="/complaints/new" element={<ComplaintRegister />} />
-              <Route
-                path="/complaints/:complaintId/uploaddoc"
-                element={<ComplaintDocuments />}
-              />
-              <Route
-                path="/application/:applicationId/complete"
-                element={<ApplicationComplete />}
-              />
+              <Route path="/complaints/:complaintId/uploaddoc" element={<ComplaintDocuments />} />
+              <Route path="/application/:applicationId/complete" element={<ApplicationComplete />} />
               <Route path="/track/status" element={<TrackApplicaiton />} />
-              <Route
-                path="/complaints/success"
-                element={<ComplaintSuccess />}
-              />
-
-              <Route path="/my-applications" element={<MyApplications />} />
-              <Route path="/application/:id" element={<ApplicationDetails />} />
-              <Route path="/complaints/track" element={<TrackComplaint />} />
+              <Route path="/voters/search" element={<VoterSearch />} />
+              <Route path="/voters/:voterId" element={<VoterDetails />} />
+              <Route path="/admin/audit-logs" element={<AuditLogs />} />
             </Routes>
-          </main>
-        </AuthProvider>
+            <Footer />
+          </div>
+        } />
 
-        {/* Footer - Always at bottom */}
-        <Footer />
-      </div>
+            <Route path="/form8" element={<VoterCorrection />} />
+            <Route path="/complaint" element={<Complaint />} />
+            <Route path="/complaints/new" element={<ComplaintRegister />} />
+            <Route
+              path="/complaints/:complaintId/uploaddoc"
+              element={<ComplaintDocuments />}
+            />
+            <Route
+              path="/application/:applicationId/complete"
+              element={<ApplicationComplete />}
+            />
+            <Route path="/track/status" element={<TrackApplicaiton />} />
+            <Route path="/complaints/success" element={<ComplaintSuccess />} />
+
+        {/* ERO Routes - No Auth for Testing */}
+        <Route path="/ero/login" element={<EroLoginPage />} />
+        <Route path="/ero" element={<EroLayout />}>
+          <Route path="dashboard" element={<EroDashboardPage />} />
+          <Route path="applications" element={<EroApplicationsPage />} />
+          <Route path="applications/:applicationId/details" element={<EroApplicationDetailsPage />} />
+          <Route path="voters" element={<EroVotersPage />} />
+          <Route path="voter-search" element={<VoterSearch />} />
+          <Route path="blo-assignment" element={<EroBloAssignmentPage />} />
+          <Route path="complaints" element={<EroComplaintsPage />} />
+          <Route path="documents/application/:applicationId" element={<EroDocumentsPage />} />
+        </Route>
+
+        {/* BLO Routes - Protected */}
+        <Route path="/blo/login" element={<BloLoginPage />} />
+        <Route path="/blo" element={<BloAuthGuard><BloLayout /></BloAuthGuard>}>
+          <Route path="dashboard" element={<BloDashboardPage />} />
+          <Route path="profile" element={<BloProfilePage />} />
+          <Route path="applications" element={<AssignedApplicationsPage />} />
+          <Route path="applications/:applicationId/details" element={<ApplicationDetailsPage />} />
+          <Route path="applications/:applicationId/documents" element={<ApplicationDocumentsPage />} />
+          <Route path="applications/:applicationId/recommend" element={<ApplicationRecommendationPage />} />
+        </Route>
+
+      </Routes>
 
   );
 }

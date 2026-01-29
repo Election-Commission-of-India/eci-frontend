@@ -1,26 +1,21 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
-import { eroLogout } from '../services/eroApis';
 
-export default function EroLayout() {
+export default function BloLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
   const navigation = [
-    { name: 'Dashboard', href: '/ero/dashboard', icon: '📊' },
-    { name: 'Applications', href: '/ero/applications', icon: '📋' },
-    { name: 'Voters', href: '/ero/voters', icon: '👥' },
-    { name: 'Voter Search', href: '/ero/voter-search', icon: '🔍' },
-    { name: 'BLO Assignment', href: '/ero/blo-assignment', icon: '👤' },
-    { name: 'Complaints', href: '/ero/complaints', icon: '📝' },
+    { name: 'Dashboard', href: '/blo/dashboard', icon: '📊' },
+    { name: 'Assigned Applications', href: '/blo/applications', icon: '📋' },
+    { name: 'Profile', href: '/blo/profile', icon: '👤' },
   ];
 
   const handleLogout = () => {
-    eroLogout(); // Clear JWT token
     toast.success('Logged out successfully');
-    navigate('/ero/login');
+    navigate('/blo/login');
   };
 
   const isActive = (href) => {
@@ -43,9 +38,9 @@ export default function EroLayout() {
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-eci-primary rounded flex items-center justify-center">
-              <span className="text-white font-bold text-sm">ERO</span>
+              <span className="text-white font-bold text-sm">BLO</span>
             </div>
-            <span className="font-semibold text-gray-900">ERO Portal</span>
+            <span className="font-semibold text-gray-900">BLO Portal</span>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -108,7 +103,7 @@ export default function EroLayout() {
             <div className="flex items-center gap-4">
               <div className="hidden md:flex flex-col">
                 <span className="text-sm font-semibold text-gray-700">
-                  Electoral Registration Officer
+                  Booth Level Officer
                 </span>
                 <span className="text-xs text-gray-600">
                   ECI Management Portal
@@ -118,11 +113,11 @@ export default function EroLayout() {
 
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
-                <div className="text-sm font-medium text-gray-900">ERO Admin</div>
-                <div className="text-xs text-gray-500">Electoral Officer</div>
+                <div className="text-sm font-medium text-gray-900">BLO</div>
+                <div className="text-xs text-gray-500">Booth Officer</div>
               </div>
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-700">E</span>
+                <span className="text-sm font-medium text-gray-700">B</span>
               </div>
             </div>
           </div>
