@@ -7,7 +7,7 @@ import { setCurrentUser } from '../../utils/auth';
 
 export default function BloLogin() {
   const [formData, setFormData] = useState({
-    usernameOrEmail: '',
+    emailOrMobile: '',
     password: ''
   });
   const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ export default function BloLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.usernameOrEmail || !formData.password) {
+    if (!formData.emailOrMobile || !formData.password) {
       toast.error('Please fill all required fields');
       return;
     }
@@ -34,8 +34,14 @@ export default function BloLogin() {
       const data = await bloLogin(formData);
       console.log("Backend response:", data);
 
-      if (data.success) {
-        setCurrentUser(data);
+      // Handle JWT response structure
+      if (data.token) {
+        setCurrentUser({
+          token: data.token,
+          userId: data.userId,
+          message: data.message,
+          success: true
+        });
         toast.success(data.message || 'Login successful');
         navigate('/blo/dashboard');
       } else {
@@ -64,8 +70,8 @@ export default function BloLogin() {
               </label>
               <input
                 type="text"
-                name="usernameOrEmail"
-                value={formData.usernameOrEmail}
+                name="emailOrMobile"
+                value={formData.emailOrMobile}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"

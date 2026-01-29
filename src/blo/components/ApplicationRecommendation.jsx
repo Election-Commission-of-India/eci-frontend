@@ -1,73 +1,79 @@
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getApplicationDetails, recommendApplication } from '../services/bloService';
 import { toast } from 'react-toastify';
 import LoadingSmall from '../../components/SmallLoading';
-import { useNavigate, useParams } from 'react-router';
 
 export default function ApplicationRecommendation() {
-  const [applicationData, setApplicationData] = useState(null);
+  const { applicationId } = useParams();
+  const navigate = useNavigate();
+  const [applicationDetails, setApplicationDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [recommendationData, setRecommendationData] = useState({
-    recommendation: '',
-    notes: ''
+  const [recommendation, setRecommendation] = useState({
+    applicationId: parseInt(applicationId),
+    recommendation: '', // 'APPROVE' or 'REJECT'
+    remarks: ''
   });
-  const navigate = useNavigate();
-  const { applicationId } = useParams();
 
   useEffect(() => {
-    if (applicationId) {
-      fetchApplicationDetails();
-    }
+    fetchApplicationDetails();
   }, [applicationId]);
 
   const fetchApplicationDetails = async () => {
     try {
       setLoading(true);
       const data = await getApplicationDetails(applicationId);
-      console.log("Application details for recommendation:", data);
-      setApplicationData(data);
+      setApplicationDetails(data);
     } catch (error) {
-      toast.error('Failed to load application details');
+      toast.error('Failed to fetch application details');
       console.error('Application details error:', error);
+      if (error.response?.status === 401) {
+        navigate('/blo/login');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e) => {
-    setRecommendationData({
-      ...recommendationData,
-      [e.target.name]: e.target.value
-    });
+  const handleRecommendationChange = (value) => {
+    setRecommendation(prev => ({
+      ...prev,
+      recommendation: value
+    }));
   };
 
-  const handleSubmitRecommendation = async () => {
-    if (!recommendationData.recommendation) {
+  const handleRemarksChange = (e) => {
+    setRecommendation(prev => ({
+      ...prev,
+      remarks: e.target.value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!recommendation.recommendation) {
       toast.error('Please select a recommendation');
       return;
     }
-
-    if (!recommendationData.notes.trim()) {
-      toast.error('Please provide notes for your recommendation');
+    
+    if (!recommendation.remarks.trim()) {
+      toast.error('Please provide remarks for your recommendation');
       return;
     }
 
     try {
       setSubmitting(true);
-      
-      const payload = {
-        applicationId: parseInt(applicationId),
-        recommendation: recommendationData.recommendation,
-        notes: recommendationData.notes.trim()
-      };
-
-      await recommendApplication(payload);
-      toast.success('Recommendation submitted successfully');
+      await recommendApplication(recommendation);
+      toast.success(`Application ${recommendation.recommendation.toLowerCase()}d successfully`);
       navigate('/blo/applications');
     } catch (error) {
       toast.error('Failed to submit recommendation');
       console.error('Recommendation error:', error);
+      if (error.response?.status === 401) {
+        navigate('/blo/login');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -81,207 +87,226 @@ export default function ApplicationRecommendation() {
     );
   }
 
-  if (!applicationData) {
+  if (!applicationDetails) {
     return (
-      <div className="text-center p-8 text-gray-500">
-        Application not found
+      <div className="text-center p-8">
+        <span className="text-4xl mb-4 block">📄</span>
+        <p className="text-gray-500">Application details not found</p>
       </div>
     );
   }
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'APPROVED': return 'bg-green-100 text-green-800';
-      case 'REJECTED': return 'bg-red-100 text-red-800';
-      case 'PENDING_FIELD_VERIFICATION': return 'bg-yellow-100 text-yellow-800';
-      case 'UNDER_VERIFICATION': return 'bg-blue-100 text-blue-800';
-      case 'FORWARDED_TO_ERO': return 'bg-purple-100 text-purple-800';
-      case 'QUERY_RAISED': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Make Recommendation</h1>
-              <p className="text-sm text-gray-600">Application #{applicationData.applicationNumber}</p>
-            </div>
-            <button
-              onClick={() => navigate(`/blo/applications/${applicationId}/details`)}
-              className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              Back to Details
-            </button>
+      <div className="bg-white border rounded-md p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-semibold text-gray-800 flex items-center">
+              <span className="mr-2">✅</span>
+              Application Recommendation
+            </h1>
+            <p className="text-sm text-gray-600">
+              Provide recommendation for Application #{applicationDetails.applicationNumber}
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/blo/applications')}
+            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 flex items-center transition-colors"
+          >
+            <span className="mr-2">←</span>
+            Back
+          </button>
+        </div>
+      </div>
+
+      {/* Application Summary */}
+      <div className="bg-white border rounded-lg p-6 shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <span className="mr-2">📋</span>
+          Application Summary
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm text-gray-600">Applicant Name</p>
+            <p className="font-medium text-gray-900">{applicationDetails.fullName}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Form Type</p>
+            <p className="font-medium text-gray-900">{applicationDetails.formType}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">EPIC Number</p>
+            <p className="font-medium text-gray-900">{applicationDetails.epicNumber || 'New Registration'}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Current Status</p>
+            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+              applicationDetails.applicationStatus === 'APPROVED' ? 'bg-green-100 text-green-800' :
+              applicationDetails.applicationStatus === 'REJECTED' ? 'bg-red-100 text-red-800' :
+              applicationDetails.applicationStatus === 'PENDING_FIELD_VERIFICATION' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-blue-100 text-blue-800'
+            }`}>
+              {applicationDetails.applicationStatus?.replace(/_/g, ' ')}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Application Summary */}
-        <div className="bg-white border rounded-lg shadow-sm p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Application Summary</h2>
-            <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(applicationData.applicationStatus)}`}>
-              {applicationData.applicationStatus?.replace(/_/g, ' ')}
-            </span>
-          </div>
+      {/* Recommendation Form */}
+      <form onSubmit={handleSubmit} className="bg-white border rounded-lg p-6 shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+          <span className="mr-2">📝</span>
+          BLO Recommendation
+        </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Applicant Information</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Name:</span>
-                  <span className="text-gray-900">{applicationData.fullName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">EPIC Number:</span>
-                  <span className="text-gray-900">{applicationData.epicNumber || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Form Type:</span>
-                  <span className="text-gray-900">{applicationData.formType}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Date of Birth:</span>
-                  <span className="text-gray-900">
-                    {applicationData.dob ? new Date(applicationData.dob).toLocaleDateString() : 'N/A'}
-                  </span>
+        {/* Recommendation Options */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Select Recommendation *
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                recommendation.recommendation === 'APPROVE'
+                  ? 'border-green-500 bg-green-50'
+                  : 'border-gray-200 hover:border-green-300'
+              }`}
+              onClick={() => handleRecommendationChange('APPROVE')}
+            >
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  name="recommendation"
+                  value="APPROVE"
+                  checked={recommendation.recommendation === 'APPROVE'}
+                  onChange={() => handleRecommendationChange('APPROVE')}
+                  className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+                />
+                <div className="ml-3">
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-2">✅</span>
+                    <span className="text-lg font-medium text-gray-900">Approve</span>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Recommend this application for approval
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Electoral Information</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Constituency:</span>
-                  <span className="text-gray-900">{applicationData.assemblyConstituencyName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Polling Station:</span>
-                  <span className="text-gray-900">{applicationData.pollingStationName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Part Number:</span>
-                  <span className="text-gray-900">{applicationData.partNumber || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Submitted:</span>
-                  <span className="text-gray-900">
-                    {applicationData.submittedDate ? new Date(applicationData.submittedDate).toLocaleDateString() : 'N/A'}
-                  </span>
+            <div
+              className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                recommendation.recommendation === 'REJECT'
+                  ? 'border-red-500 bg-red-50'
+                  : 'border-gray-200 hover:border-red-300'
+              }`}
+              onClick={() => handleRecommendationChange('REJECT')}
+            >
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  name="recommendation"
+                  value="REJECT"
+                  checked={recommendation.recommendation === 'REJECT'}
+                  onChange={() => handleRecommendationChange('REJECT')}
+                  className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+                />
+                <div className="ml-3">
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-2">❌</span>
+                    <span className="text-lg font-medium text-gray-900">Reject</span>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Recommend this application for rejection
+                  </p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recommendation Form */}
-        <div className="bg-white border rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">BLO Recommendation</h2>
-
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Recommendation *
-              </label>
-              <div className="space-y-3">
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="recommendation"
-                    value="APPROVE"
-                    checked={recommendationData.recommendation === 'APPROVE'}
-                    onChange={handleInputChange}
-                    className="mr-3 text-green-600 focus:ring-green-500"
-                  />
-                  <span className="text-sm">
-                    <span className="font-medium text-green-700">Approve</span> - Recommend this application for approval
-                  </span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="recommendation"
-                    value="REJECT"
-                    checked={recommendationData.recommendation === 'REJECT'}
-                    onChange={handleInputChange}
-                    className="mr-3 text-red-600 focus:ring-red-500"
-                  />
-                  <span className="text-sm">
-                    <span className="font-medium text-red-700">Reject</span> - Recommend this application for rejection
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Recommendation Notes *
-              </label>
-              <textarea
-                name="notes"
-                value={recommendationData.notes}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows="6"
-                placeholder="Provide detailed notes explaining your recommendation. Include any observations from field verification, document verification results, and other relevant factors..."
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Please provide comprehensive notes to support your recommendation decision.
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-4 pt-6 border-t">
-              <button
-                onClick={handleSubmitRecommendation}
-                disabled={submitting || !recommendationData.recommendation || !recommendationData.notes.trim()}
-                className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-              >
-                {submitting ? (
-                  <>
-                    <LoadingSmall size="sm" />
-                    <span className="ml-2">Submitting...</span>
-                  </>
-                ) : (
-                  'Submit Recommendation'
-                )}
-              </button>
-              <button
-                onClick={() => navigate(`/blo/applications/${applicationId}/details`)}
-                disabled={submitting}
-                className="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Cancel
-              </button>
             </div>
           </div>
         </div>
 
-        {/* Quick Links */}
-        <div className="mt-6 flex justify-center gap-4">
+        {/* Remarks */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Remarks *
+          </label>
+          <textarea
+            value={recommendation.remarks}
+            onChange={handleRemarksChange}
+            rows={4}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder={`Please provide detailed remarks for your ${recommendation.recommendation?.toLowerCase() || 'recommendation'}...`}
+            required
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Provide clear reasoning for your recommendation. This will be visible to ERO.
+          </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-4">
           <button
-            onClick={() => navigate(`/blo/applications/${applicationId}/documents`)}
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            type="submit"
+            disabled={submitting || !recommendation.recommendation || !recommendation.remarks.trim()}
+            className={`flex-1 flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-colors ${
+              recommendation.recommendation === 'APPROVE'
+                ? 'bg-green-600 hover:bg-green-700 text-white'
+                : recommendation.recommendation === 'REJECT'
+                ? 'bg-red-600 hover:bg-red-700 text-white'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            Review Documents Again
+            {submitting ? (
+              <>
+                <LoadingSmall size="sm" />
+                <span className="ml-2">Submitting...</span>
+              </>
+            ) : (
+              <>
+                <span className="mr-2">
+                  {recommendation.recommendation === 'APPROVE' ? '✅' : 
+                   recommendation.recommendation === 'REJECT' ? '❌' : '📤'}
+                </span>
+                Submit Recommendation
+              </>
+            )}
           </button>
-          <span className="text-gray-300">|</span>
+          
           <button
-            onClick={() => navigate('/blo/applications')}
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            type="button"
+            onClick={() => navigate(`/blo/applications/${applicationId}/details`)}
+            className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            Back to Applications List
+            Review Details
           </button>
         </div>
+      </form>
+
+      {/* Guidelines */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h4 className="text-lg font-semibold text-blue-900 mb-3 flex items-center">
+          <span className="mr-2">💡</span>
+          Recommendation Guidelines
+        </h4>
+        <ul className="text-sm text-blue-800 space-y-2">
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            Verify all documents are authentic and match the application details
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            Ensure the applicant meets all eligibility criteria
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            Check for any duplicate registrations or conflicting information
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            Provide clear and detailed remarks to support your recommendation
+          </li>
+        </ul>
       </div>
     </div>
   );

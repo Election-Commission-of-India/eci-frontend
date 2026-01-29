@@ -33,12 +33,14 @@ import EroDocumentsPage from "./ero/pages/EroDocumentsPage";
 
 // BLO Components
 import BloLoginPage from "./blo/pages/BloLoginPage";
+import BloLayout from "./blo/components/BloLayout";
 import BloDashboardPage from "./blo/pages/BloDashboardPage";
 import BloProfilePage from "./blo/pages/BloProfilePage";
 import AssignedApplicationsPage from "./blo/pages/AssignedApplicationsPage";
 import ApplicationDetailsPage from "./blo/pages/ApplicationDetailsPage";
 import ApplicationDocumentsPage from "./blo/pages/ApplicationDocumentsPage";
 import ApplicationRecommendationPage from "./blo/pages/ApplicationRecommendationPage";
+import BloAuthGuard from "./blo/components/BloAuthGuard";
 
 // Voter Search Components
 import VoterSearch from "./pages/voter/VoterSearch";
@@ -98,14 +100,16 @@ function App() {
           <Route path="documents/application/:applicationId" element={<EroDocumentsPage />} />
         </Route>
 
-        {/* BLO Routes - No Auth for Testing */}
+        {/* BLO Routes - Protected */}
         <Route path="/blo/login" element={<BloLoginPage />} />
-        <Route path="/blo/dashboard" element={<BloDashboardPage />} />
-        <Route path="/blo/profile" element={<BloProfilePage />} />
-        <Route path="/blo/applications" element={<AssignedApplicationsPage />} />
-        <Route path="/blo/applications/:applicationId/details" element={<ApplicationDetailsPage />} />
-        <Route path="/blo/applications/:applicationId/documents" element={<ApplicationDocumentsPage />} />
-        <Route path="/blo/applications/:applicationId/recommend" element={<ApplicationRecommendationPage />} />
+        <Route path="/blo" element={<BloAuthGuard><BloLayout /></BloAuthGuard>}>
+          <Route path="dashboard" element={<BloDashboardPage />} />
+          <Route path="profile" element={<BloProfilePage />} />
+          <Route path="applications" element={<AssignedApplicationsPage />} />
+          <Route path="applications/:applicationId/details" element={<ApplicationDetailsPage />} />
+          <Route path="applications/:applicationId/documents" element={<ApplicationDocumentsPage />} />
+          <Route path="applications/:applicationId/recommend" element={<ApplicationRecommendationPage />} />
+        </Route>
 
       </Routes>
 

@@ -30,16 +30,6 @@ function ServiceSection() {
             primaryBtn: "bg-green-500 hover:bg-green-600",
           }}
         />
-        <GenericActionCard 
-          title={"Admin - Audit Logs"} 
-          primaryAction={{ label: "View Logs", onClick: () => { navigate("/admin/audit-logs") } }}
-          theme={{
-            border: "border-purple-400",
-            bg: "bg-purple-50",
-            iconBg: "bg-purple-200",
-            primaryBtn: "bg-purple-500 hover:bg-purple-600",
-          }}
-        />
       </div>
     </div>
   );

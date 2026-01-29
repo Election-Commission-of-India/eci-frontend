@@ -1,6 +1,5 @@
 import axiosInstance from '../../services/axiosInstance';
 
-
 // BLO Authentication
 export const bloLogin = async (loginData) => {
   const response = await axiosInstance.post('/api/v1/blo/login', loginData);
@@ -19,19 +18,19 @@ export const getBloDashboard = async (userId) => {
   return response.data;
 };
 
-// BLO Applications
-export const getAssignedApplications = async (userId) => {
-  const response = await axiosInstance.get(`/api/v1/blo/applications/assigned/${userId}`);
+// BLO Applications - JWT endpoints (no userId needed)
+export const getAssignedApplications = async () => {
+  const response = await axiosInstance.get('/api/v1/blo/applications/assigned');
   return response.data;
 };
 
-export const filterApplications = async (userId, filterData) => {
-  const response = await axiosInstance.post(`/api/v1/blo/applications/filter/${userId}`, filterData);
+export const filterApplications = async (filterData) => {
+  const response = await axiosInstance.post('/api/v1/blo/applications/filter', filterData);
   return response.data;
 };
 
-export const searchApplications = async (userId, searchTerm) => {
-  const response = await axiosInstance.get(`/api/v1/blo/applications/search/${userId}?searchTerm=${encodeURIComponent(searchTerm)}`);
+export const searchApplications = async (searchTerm) => {
+  const response = await axiosInstance.get(`/api/v1/blo/applications/search?searchTerm=${encodeURIComponent(searchTerm)}`);
   return response.data;
 };
 
@@ -45,9 +44,11 @@ export const getApplicationDocuments = async (applicationId) => {
   return response.data;
 };
 
-export const verifyDocument = async (verificationData) => {
-  const response = await axiosInstance.put('/api/v1/blo/applications/verify-document', verificationData);
-  return response.data;
+export const downloadApplicationDocument = async (applicationId, documentId) => {
+  const response = await axiosInstance.get(`/api/v1/blo/applications/${applicationId}/documents/${documentId}/download`, {
+    responseType: 'blob'
+  });
+  return response;
 };
 
 export const recommendApplication = async (recommendationData) => {
