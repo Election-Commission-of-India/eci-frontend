@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getApplicationsByConstituency, filterApplications } from '../services/eroApis';
+import { getApplicationsByConstituency, filterApplications, generateEpic } from '../services/eroApis';
 import { toast } from 'react-toastify';
 import LoadingSmall from '../../components/SmallLoading';
 import { useNavigate } from 'react-router';
@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router';
 export default function EroApplications() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [epicGenerating, setEpicGenerating] = useState({});
   const [filters, setFilters] = useState({
     constituencyId: '',
     status: '',
@@ -75,6 +76,28 @@ export default function EroApplications() {
 
   const viewApplicationDetails = (applicationId) => {
     navigate(`/ero/applications/${applicationId}/details`);
+  };
+
+  const handleGenerateEpic = async (applicationId) => {
+    try {
+      setEpicGenerating(prev => ({ ...prev, [applicationId]: true }));
+      const response = await generateEpic(applicationId);
+
+      toast.success(`EPIC Generated: ${response.epicNumber}`);
+
+      // Update the application in the list
+      setApplications(prev => prev.map(app =>
+        app.applicationId === applicationId
+          ? { ...app, epicNumber: response.epicNumber, applicationStatus: 'EPIC_GENERATED' }
+          : app
+      ));
+
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to generate EPIC';
+      toast.error(errorMessage);
+    } finally {
+      setEpicGenerating(prev => ({ ...prev, [applicationId]: false }));
+    }
   };
 
   return (
@@ -217,6 +240,7 @@ export default function EroApplications() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applicant Name</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Form Type</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">EPIC</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
@@ -235,29 +259,48 @@ export default function EroApplications() {
                       <td className="px-4 py-3">
                         <span
                           className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${app.applicationStatus === 'APPROVED'
-                            ? 'bg-green-100 text-green-800'
-                            : app.applicationStatus === 'REJECTED'
-                              ? 'bg-red-100 text-red-800'
-                              : app.applicationStatus === 'UNDER_REVIEW'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-gray-100 text-gray-800'
+                              ? 'bg-green-100 text-green-800'
+                              : app.applicationStatus === 'REJECTED'
+                                ? 'bg-red-100 text-red-800'
+                                : app.applicationStatus === 'UNDER_REVIEW'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : app.applicationStatus === 'EPIC_GENERATED'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-gray-100 text-gray-800'
                             }`}
                         >
                           {app.applicationStatus}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-900">
+                        {app.epicNumber || '-'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900">
                         {app.submissionDate
                           ? new Date(app.submissionDate).toLocaleDateString()
                           : '-'}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 flex gap-2">
                         <button
                           onClick={() => viewApplicationDetails(app.applicationId)}
                           className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                         >
                           View Details
                         </button>
+
+                        {app.applicationStatus === 'APPROVED' && !app.epicNumber && (
+                          <button
+                            onClick={() => handleGenerateEpic(app.applicationId)}
+                            disabled={epicGenerating[app.applicationId]}
+                            className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 disabled:opacity-50"
+                          >
+                            {epicGenerating[app.applicationId] ? 'Generating...' : 'Generate EPIC'}
+                          </button>
+                        )}
+
+                        {app.epicNumber && (
+                          <span className="text-green-600 text-xs font-medium">✓ EPIC Generated</span>
+                        )}
                       </td>
                     </tr>
                   );

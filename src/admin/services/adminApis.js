@@ -4,11 +4,7 @@ import apiClient from '../../services/apis.js';
 export const adminLogin = async (loginData) => {
   const response = await apiClient.post('/admin/login', loginData);
 
-  //  CLEAR OLD SESSION (IMPORTANT)
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('authRole');
-
-  //  STORE TOKEN IN STANDARD KEY
+  // Store JWT token if login successful
   if (response.data.jwt) {
     localStorage.setItem('authToken', response.data.jwt);
     localStorage.setItem('authRole', 'ROLE_ADMIN');
@@ -88,7 +84,6 @@ export const createDocumentType = async (documentTypeData) => {
   return response.data;
 };
 
-// Helper APIs
 export const getDistricts = async () => {
   const response = await apiClient.get('/admin/districts');
   return response.data;
