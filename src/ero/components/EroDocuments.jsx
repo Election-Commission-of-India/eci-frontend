@@ -8,6 +8,7 @@ export default function EroDocuments() {
   const { applicationId } = useParams();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [verificationModal, setVerificationModal] = useState({
     show: false,
     documentId: null,
@@ -15,6 +16,7 @@ export default function EroDocuments() {
     verificationStatus: '',
     remarks: ''
   });
+
   const navigate = useNavigate();
 
   const verificationStatuses = ['APPROVED', 'REJECTED', 'PENDING'];
@@ -28,8 +30,22 @@ export default function EroDocuments() {
   const fetchDocuments = async () => {
     try {
       setLoading(true);
+
       const data = await getDocumentsByApplication(applicationId);
-      setDocuments(data);
+
+      const normalizedDocs = Array.isArray(data)
+        ? data.map((d, index) => ({
+          doc_id: d[0],
+          document_type: d[1],
+          file_path: d[2],
+          verification_status: d[3] || 'PENDING',
+          remarks: d[4] ?? null
+        }))
+        : [];
+
+      console.log('NORMALIZED DOCUMENTS:', normalizedDocs);
+      setDocuments(normalizedDocs);
+
     } catch (error) {
       toast.error('Failed to load documents');
       console.error('Documents error:', error);
@@ -38,12 +54,14 @@ export default function EroDocuments() {
     }
   };
 
+
+
   const openVerificationModal = (document) => {
     setVerificationModal({
       show: true,
-      documentId: document.id,
-      documentName: document.documentType || document.fileName,
-      verificationStatus: document.verificationStatus || 'PENDING',
+      documentId: document.doc_id,
+      documentName: document.document_type,
+      verificationStatus: document.verification_status || 'PENDING',
       remarks: document.remarks || ''
     });
   };
@@ -59,6 +77,11 @@ export default function EroDocuments() {
   };
 
   const handleVerifyDocument = async () => {
+    if (!verificationModal.documentId) {
+      toast.error('Document ID missing');
+      return;
+    }
+
     if (!verificationModal.verificationStatus) {
       toast.error('Please select verification status');
       return;
@@ -69,9 +92,10 @@ export default function EroDocuments() {
         verificationStatus: verificationModal.verificationStatus,
         remarks: verificationModal.remarks
       });
+
       toast.success('Document verification updated successfully');
       closeVerificationModal();
-      fetchDocuments(); // Refresh the list
+      fetchDocuments();
     } catch (error) {
       toast.error('Failed to update document verification');
       console.error('Verification error:', error);
@@ -91,9 +115,9 @@ export default function EroDocuments() {
     }
   };
 
-  const viewDocument = (documentUrl) => {
-    if (documentUrl) {
-      window.open(documentUrl, '_blank');
+  const viewDocument = (filePath) => {
+    if (filePath) {
+      window.open(filePath, '_blank');
     } else {
       toast.error('Document URL not available');
     }
@@ -130,22 +154,24 @@ export default function EroDocuments() {
         ) : (
           <div className="divide-y divide-gray-200">
             {documents.map((document) => (
-              <div key={document.id} className="p-4">
+              <div key={`${document.doc_id}`} className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
                       <h4 className="font-medium text-gray-900">
-                        {document.documentType || document.fileName}
+                        {document.document_type}
                       </h4>
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(document.verificationStatus)}`}>
-                        {document.verificationStatus || 'PENDING'}
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                          document.verification_status
+                        )}`}
+                      >
+                        {document.verification_status || 'PENDING'}
                       </span>
                     </div>
-                    
+
                     <div className="mt-2 text-sm text-gray-600">
-                      <p>File Name: {document.fileName}</p>
-                      <p>File Size: {document.fileSize ? `${(document.fileSize / 1024).toFixed(2)} KB` : 'N/A'}</p>
-                      <p>Upload Date: {document.uploadDate ? new Date(document.uploadDate).toLocaleDateString() : 'N/A'}</p>
+                      <p>File Path: {document.file_path}</p>
                       {document.remarks && (
                         <p className="mt-1">
                           <span className="font-medium">Remarks:</span> {document.remarks}
@@ -156,12 +182,13 @@ export default function EroDocuments() {
 
                   <div className="flex gap-2 ml-4">
                     <button
-                      onClick={() => viewDocument(document.documentUrl)}
+                      onClick={() => viewDocument(document.file_path)}
                       className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
                     >
                       View
                     </button>
                     <button
+
                       onClick={() => openVerificationModal(document)}
                       className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
                     >
@@ -182,7 +209,7 @@ export default function EroDocuments() {
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               Verify Document: {verificationModal.documentName}
             </h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -190,15 +217,19 @@ export default function EroDocuments() {
                 </label>
                 <select
                   value={verificationModal.verificationStatus}
-                  onChange={(e) => setVerificationModal({
-                    ...verificationModal, 
-                    verificationStatus: e.target.value
-                  })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) =>
+                    setVerificationModal({
+                      ...verificationModal,
+                      verificationStatus: e.target.value
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 >
                   <option value="">Select Status</option>
-                  {verificationStatuses.map(status => (
-                    <option key={status} value={status}>{status}</option>
+                  {verificationStatuses.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -208,36 +239,29 @@ export default function EroDocuments() {
                   Remarks
                 </label>
                 <textarea
-                  value={verificationModal.remarks}
-                  onChange={(e) => setVerificationModal({
-                    ...verificationModal, 
-                    remarks: e.target.value
-                  })}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter verification remarks (optional)"
+                  value={verificationModal.remarks}
+                  onChange={(e) =>
+                    setVerificationModal({
+                      ...verificationModal,
+                      remarks: e.target.value
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
-
-              {verificationModal.verificationStatus === 'REJECTED' && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                  <p className="text-sm text-red-700">
-                    Please provide detailed remarks explaining why the document is being rejected.
-                  </p>
-                </div>
-              )}
             </div>
 
             <div className="flex gap-3 mt-6">
               <button
                 onClick={handleVerifyDocument}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+                className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
               >
                 Update Verification
               </button>
               <button
                 onClick={closeVerificationModal}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                className="px-4 py-2 border rounded-md"
               >
                 Cancel
               </button>

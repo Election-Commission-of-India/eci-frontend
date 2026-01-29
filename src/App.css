@@ -21,6 +21,8 @@
   --color-eci-secondary: #daf0f7;
   --color-eci-accent: #fbe3e3;
 
+  --color-eci-red: #fbe3e3;
+
   --color-eci-pink: #fbe2f4;
 
   --color-eci-green: #dbf7c4;
@@ -43,4 +45,25 @@
 
   /* Custom Font Sizes */
   --font-size-xxs: 0.625rem;
+}
+
+/* Modal Animation */
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
 }

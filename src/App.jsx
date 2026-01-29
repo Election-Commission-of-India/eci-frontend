@@ -1,7 +1,7 @@
 import "./App.css";
 import { Route, Routes } from "react-router";
 import Home from "./pages/Home";
-import Header from "./components/Header";
+import Header from "./components/HeaderCitizen";
 import Footer from "./components/Footer";
 import Form6 from "./components/form6/Form6";
 import VoterRegistration from "./pages/VoterRegistration";
@@ -16,9 +16,15 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ApplicationComplete from "./pages/ApplicationComplete";
 import TrackApplicaiton from "./pages/TrackApplicaiton";
+import ComplaintSuccess from "./pages/ComplaintSuccess";
+import MyApplications from "./pages/MyApplication";
+import ApplicationDetails from "./pages/ApplicationDetail";
+import TrackComplaint from "./pages/TrackComplaint";
 
-// Auth Components
-import { LoginPage as AuthLoginPage, SignupPage as AuthSignupPage } from "./auth";
+// Authentication
+import { AuthProvider } from "./contexts/AuthContext";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 
 // ERO Components
 import EroLoginPage from "./ero/pages/EroLoginPage";
@@ -51,6 +57,71 @@ import AuditLogs from "./pages/admin/AuditLogs";
 
 function App() {
   return (
+    <AuthProvider>
+      <div>
+        <Routes>
+          {/* Authentication Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+
+          {/* Public Routes */}
+          <Route path="/*" element={
+            <div>
+              <Header />
+              <Routes>
+                <Route path="/home" element={<Home />} />
+                <Route path="/form6" element={<VoterRegistration />} />
+                <Route path="/form6/preview" element={<Form6Preview />} />
+                <Route
+                  path="/form6/:applicationId/uploaddoc"
+                  element={<UploadDocuments />}
+                />
+                <Route
+                  path="/form8/:applicationId/uploaddoc"
+                  element={<UploadSupportingDocuments />}
+                />
+                <Route path="/form8" element={<VoterCorrection />} />
+                <Route path="/complaint" element={<Complaint />} />
+                <Route path="/complaints/new" element={<ComplaintRegister />} />
+                <Route path="/complaints/:complaintId/uploaddoc" element={<ComplaintDocuments />} />
+                <Route path="/application/:applicationId/complete" element={<ApplicationComplete />} />
+                <Route path="/track/status" element={<TrackApplicaiton />} />
+              </Routes>
+              <Footer />
+            </div>
+          } />
+
+          {/* ERO Routes */}
+          <Route path="/ero/login" element={<EroLoginPage />} />
+          <Route path="/ero" element={<EroLayout />}>
+            <Route path="dashboard" element={<EroDashboardPage />} />
+            <Route path="applications" element={<EroApplicationsPage />} />
+            <Route path="applications/:applicationId/details" element={<EroApplicationDetailsPage />} />
+            <Route path="voters" element={<EroVotersPage />} />
+            <Route path="blo-assignment" element={<EroBloAssignmentPage />} />
+            <Route path="complaints" element={<EroComplaintsPage />} />
+            <Route path="documents/application/:applicationId" element={<EroDocumentsPage />} />
+          </Route>
+
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin" element={
+            <AdminProtectedRoute>
+              <AdminLayout />
+            </AdminProtectedRoute>
+          }>
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+            <Route path="users" element={<AdminUserManagementPage />} />
+            <Route path="constituencies" element={<AdminConstituencyManagementPage />} />
+            <Route path="polling-stations" element={<AdminPollingStationManagementPage />} />
+            <Route path="document-types" element={<AdminDocumentTypeManagementPage />} />
+          </Route>
+
+        </Routes>
+
+        <ToastContainer limit={2000} />
+      </div>
+    </AuthProvider>
     <div>
       <Routes>
         {/* Public Routes */}
@@ -83,9 +154,19 @@ function App() {
           </div>
         } />
 
-        {/* Auth Routes */}
-        <Route path="/login" element={<AuthLoginPage />} />
-        <Route path="/signup" element={<AuthSignupPage />} />
+            <Route path="/form8" element={<VoterCorrection />} />
+            <Route path="/complaint" element={<Complaint />} />
+            <Route path="/complaints/new" element={<ComplaintRegister />} />
+            <Route
+              path="/complaints/:complaintId/uploaddoc"
+              element={<ComplaintDocuments />}
+            />
+            <Route
+              path="/application/:applicationId/complete"
+              element={<ApplicationComplete />}
+            />
+            <Route path="/track/status" element={<TrackApplicaiton />} />
+            <Route path="/complaints/success" element={<ComplaintSuccess />} />
 
         {/* ERO Routes - No Auth for Testing */}
         <Route path="/ero/login" element={<EroLoginPage />} />

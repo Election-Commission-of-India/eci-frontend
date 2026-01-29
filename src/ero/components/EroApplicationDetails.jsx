@@ -13,12 +13,35 @@ export default function EroApplicationDetails() {
   useEffect(() => {
     fetchApplicationDetails();
   }, [applicationId]);
+  const normalizeApplication = (data) => ({
+    ...data,
+
+    // dates
+    submissionDate: data.submissionDate || data.submitted_date,
+    dateOfBirth: data.dateOfBirth || data.dob,
+
+    // ids
+    constituencyId: data.constituencyId || data.assembly_id || data.assemblyId,
+
+    // applicant name fallback
+    fullName: data.fullName || data.applicantName,
+
+    // BLO fields
+    bloId: data.bloId || data.assigned_blo,
+    bloName: data.bloName || data.assignedBloName,
+  });
 
   const fetchApplicationDetails = async () => {
     try {
       setLoading(true);
-      const data = await getApplicationWithBlo(applicationId);
-      setApplication(data);
+      const rawData = await getApplicationWithBlo(applicationId);
+      const normalizedData = normalizeApplication(rawData);
+
+      console.log('RAW API DATA:', rawData);
+      console.log('NORMALIZED DATA:', normalizedData);
+
+      setApplication(normalizedData);
+
     } catch (error) {
       toast.error('Failed to load application details');
       console.error('Application details error:', error);
@@ -150,7 +173,7 @@ export default function EroApplicationDetails() {
         >
           View Documents
         </button>
-        
+
         {application.applicationStatus === 'SUBMITTED' && (
           <button
             onClick={() => {

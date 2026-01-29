@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
+import { eroLogout } from '../services/eroApis';
 
 export default function EroLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -17,6 +18,7 @@ export default function EroLayout() {
   ];
 
   const handleLogout = () => {
+    eroLogout(); // Clear JWT token
     toast.success('Logged out successfully');
     navigate('/ero/login');
   };
