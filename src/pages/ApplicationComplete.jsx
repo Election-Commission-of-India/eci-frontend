@@ -1,106 +1,82 @@
-import { useParams, useNavigate } from "react-router";
-import { useEffect } from "react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function ApplicationComplete() {
-  const { applicationId } = useParams();
+const ApplicationSuccessModal = ({ isOpen, onClose, applicationNumber }) => {
   const navigate = useNavigate();
-//   const location = useLocation();
 
-  // Prevent back navigation
-  useEffect(() => {
-    const handlePopState = () => {
-      navigate(`/application/${applicationId}/complete`, { replace: true });
-    };
-    
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [applicationId, navigate]);
+  if (!isOpen) return null;
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <div className="max-w-2xl w-full mx-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 text-center">
-          {/* Success Icon */}
-          <div className="mb-6">
-            <svg
-              className="w-24 h-24 mx-auto text-green-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Blurred Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-scale-in">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        {/* Success Icon */}
+        <div className="flex justify-center mb-4">
+          <div className="bg-green-100 rounded-full p-3">
+            <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
+        </div>
 
-          {/* Title */}
-          <h1 className="text-3xl font-bold text-gray-800 mb-3">
-            Application Submitted Successfully!
-          </h1>
+        {/* Title */}
+        <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">
+          Submitted Successfully!
+        </h2>
 
-          {/* Application Number */}
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-gray-600 mb-1">Your Application Number</p>
-            <p className="text-2xl font-bold text-blue-600">{applicationId}</p>
-            <p className="text-xs text-gray-500 mt-1">Please save this for future reference</p>
-          </div>
-
-          {/* Success Message */}
-          <p className="text-gray-600 mb-6">
-            Your voter registration application (Form 6) and all supporting documents
-            have been successfully submitted.
+        {/* Application Number */}
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 mb-4">
+          <p className="text-xs text-gray-600 text-center mb-1">Application Number</p>
+          <p className="text-xl font-bold text-green-700 text-center tracking-wide">
+            {applicationNumber}
           </p>
+        </div>
 
-          {/* Next Steps */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-6 text-left">
-            <h2 className="font-semibold text-gray-800 mb-3">📋 What Happens Next?</h2>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li className="flex items-start gap-2">
-                <span className="text-blue-600 font-bold">1.</span>
-                <span>Your application will be verified by the Booth Level Officer (BLO)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-600 font-bold">2.</span>
-                <span>You will receive SMS and email updates on your application status</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-600 font-bold">3.</span>
-                <span>Processing typically takes 7-15 working days</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-600 font-bold">4.</span>
-                <span>Once approved, your name will be added to the electoral roll</span>
-              </li>
-            </ul>
-          </div>
+        {/* Message */}
+        <p className="text-gray-600 text-center text-sm mb-6">
+          Your application has been submitted. You'll receive updates via SMS and email.
+        </p>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button
-              onClick={() => navigate(`/track/status`)}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium"
-            >
-              Track Application Status
-            </button>
-            
-            <button
-              onClick={() => navigate("/")}
-              className="border-2 border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-50 font-medium"
-            >
-              Go to Home
-            </button>
-          </div>
-
-          {/* Note */}
-          <p className="text-xs text-gray-500 mt-6">
-            💡 You can track your application status anytime using your application number
-          </p>
+        {/* Buttons */}
+        <div className="space-y-2">
+          <button
+            onClick={() => {
+              onClose();
+              navigate("/track/status");
+            }}
+            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-medium transition"
+          >
+            Track Status
+          </button>
+          <button
+            onClick={() => {
+              onClose();
+              navigate("/");
+            }}
+            className="w-full border-2 border-gray-300 py-3 rounded-lg hover:bg-gray-50 font-medium transition"
+          >
+            Go to Home
+          </button>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default ApplicationSuccessModal;

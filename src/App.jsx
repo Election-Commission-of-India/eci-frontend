@@ -1,7 +1,7 @@
 import "./App.css";
 import { Route, Routes } from "react-router";
 import Home from "./pages/Home";
-import Header from "./components/Header";
+import Header from "./components/HeaderCitizen";
 import Footer from "./components/Footer";
 import Form6 from "./components/form6/Form6";
 import VoterRegistration from "./pages/VoterRegistration";

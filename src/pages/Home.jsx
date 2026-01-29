@@ -1,7 +1,7 @@
 import AboutUs from "../components/AboutUs";
 import ContactUs from "../components/ContactUs";
 import FormSection from "../components/FormSection";
-import Header from "../components/Header";
+import Header from "../components/HeaderCitizen";
 import ServiceSection from "../components/ServiceSection";
 
 export default function Home() {
