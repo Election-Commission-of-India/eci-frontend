@@ -24,10 +24,7 @@ import LoginPage from "./pages/Login";
 import Register from "./pages/RegisterPage";
 import { AuthProvider } from "./contexts/AuthContext";
 
-// Authentication
-import { AuthProvider } from "./contexts/AuthContext";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+
 
 // ERO Components
 import EroLoginPage from "./ero/pages/EroLoginPage";
@@ -49,15 +46,14 @@ import AdminConstituencyManagementPage from "./admin/pages/AdminConstituencyMana
 import AdminPollingStationManagementPage from "./admin/pages/AdminPollingStationManagementPage";
 import AdminDocumentTypeManagementPage from "./admin/pages/AdminDocumentTypeManagementPage";
 import AdminProtectedRoute from "./admin/components/AdminProtectedRoute";
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
   return (
     <AuthProvider>
       <div>
         <Routes>
-          {/* Authentication Routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+
 
           {/* Public Routes */}
           <Route path="/*" element={
@@ -168,8 +164,6 @@ function App() {
         <Footer />
       </div>
 
-      <ToastContainer limit={2000} />
-    </div>
   );
 }
 
