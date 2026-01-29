@@ -21,10 +21,7 @@ import MyApplications from "./pages/MyApplication";
 import ApplicationDetails from "./pages/ApplicationDetail";
 import TrackComplaint from "./pages/TrackComplaint";
 
-// Authentication
-import { AuthProvider } from "./contexts/AuthContext";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+
 
 // ERO Components
 import EroLoginPage from "./ero/pages/EroLoginPage";
@@ -46,15 +43,14 @@ import AdminConstituencyManagementPage from "./admin/pages/AdminConstituencyMana
 import AdminPollingStationManagementPage from "./admin/pages/AdminPollingStationManagementPage";
 import AdminDocumentTypeManagementPage from "./admin/pages/AdminDocumentTypeManagementPage";
 import AdminProtectedRoute from "./admin/components/AdminProtectedRoute";
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
   return (
     <AuthProvider>
       <div>
         <Routes>
-          {/* Authentication Routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+
 
           {/* Public Routes */}
           <Route path="/*" element={
@@ -114,52 +110,7 @@ function App() {
         <ToastContainer limit={2000} />
       </div>
     </AuthProvider>
-    <div>
-      <div className="flex flex-col min-h-screen">
-        {/* Navbar */}
-        <Header />
 
-        {/* Main Content - Takes up remaining space */}
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/home" element={<Home />} />
-            <Route path="/form6" element={<VoterRegistration />} />
-            <Route path="/form6/preview" element={<Form6Preview />} />
-            <Route
-              path="/form6/:applicationId/uploaddoc"
-              element={<UploadDocuments />}
-            />
-            <Route
-              path="/form8/:applicationId/uploaddoc"
-              element={<UploadSupportingDocuments />}
-            />
-
-            <Route path="/form8" element={<VoterCorrection />} />
-            <Route path="/complaint" element={<Complaint />} />
-            <Route path="/complaints/new" element={<ComplaintRegister />} />
-            <Route
-              path="/complaints/:complaintId/uploaddoc"
-              element={<ComplaintDocuments />}
-            />
-            <Route
-              path="/application/:applicationId/complete"
-              element={<ApplicationComplete />}
-            />
-            <Route path="/track/status" element={<TrackApplicaiton />} />
-            <Route path="/complaints/success" element={<ComplaintSuccess />} />
-
-            <Route path="/my-applications" element={<MyApplications />} />
-            <Route path="/application/:id" element={<ApplicationDetails />} />
-            <Route path="/complaints/track" element={<TrackComplaint />} />
-          </Routes>
-        </main>
-
-        {/* Footer - Always at bottom */}
-        <Footer />
-      </div>
-
-      <ToastContainer limit={2000} />
-    </div>
   );
 }
 
